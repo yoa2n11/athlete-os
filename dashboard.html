@@ -117,6 +117,16 @@
 
   .sessions { grid-column: span 12; margin-top: 16px; }
   .sessions .note { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .sessions-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  #week-select {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; font-size: 12.5px; cursor: pointer;
+  }
+  #rollup-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+  #rollup-table th { text-align: left; color: var(--muted); font-size: 10.5px; text-transform: uppercase; padding-bottom: 6px; font-weight: 600; }
+  #rollup-table td { padding: 5px 8px 5px 0; border-top: 1px solid var(--border); }
+  #rollup-table tr.total td { font-weight: 700; color: var(--accent-2); border-top: 2px solid var(--border); }
+  #rollup-note { margin-top: 10px; line-height: 1.5; }
   .day-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .day-row:last-child { border-bottom: none; }
   .day-row .day { color: var(--accent-2); font-weight: 600; min-width: 90px; }
@@ -275,37 +285,18 @@
           </div>
         </div>
         <div class="card sessions">
-          <h3>Séances, semaine du 27/07 (à venir)</h3>
-          <div class="note">Prochaine semaine déjà construite par plan-my-week. Largeur des barres = durée, hauteur = intensité (plus haut et plus orangé = plus dur), comme sur intervals.icu.</div>
-
-          <div class="day-block">
-            <div class="day-block-head"><span class="day">Lundi</span><span class="desc">Natation eau libre, 1h Z2</span></div>
-            <div class="workout-bar" id="chart-mon"></div>
+          <div class="sessions-head">
+            <h3 id="sessions-title" style="margin:0">Séances</h3>
+            <select id="week-select"></select>
           </div>
+          <div class="note">Largeur des barres = durée, hauteur = intensité (plus haut et plus orangé = plus dur), comme sur intervals.icu.</div>
 
-          <div class="day-block">
-            <div class="day-block-head"><span class="day">Mardi</span><span class="desc">Seuil brisé 4x6' R3', 58 min</span></div>
-            <div class="workout-bar" id="chart-tue"></div>
-          </div>
+          <div id="sessions-days"></div>
 
-          <div class="day-block">
-            <div class="day-block-head"><span class="day">Mercredi</span><span class="desc">Natation eau libre, 1h Z2</span></div>
-            <div class="workout-bar" id="chart-wed"></div>
-          </div>
-
-          <div class="day-block">
-            <div class="day-block-head"><span class="day">Jeudi</span><span class="desc">Footing facile, 45 min Z2</span></div>
-            <div class="workout-bar" id="chart-thu"></div>
-          </div>
-
-          <div class="day-block rest">
-            <div class="day-block-head"><span class="day">Ven-Sam</span><span class="desc">Trajet vers Annecy, rien de prévu</span></div>
-          </div>
-
-          <div class="day-block">
-            <div class="day-block-head"><span class="day">Dimanche</span><span class="desc">Reprise libre à Annecy: vélo 2h OU CAP 1h30, Z2, au choix</span></div>
-            <div class="workout-bar" id="chart-sun-bike"></div>
-            <div class="workout-bar" id="chart-sun-run" style="margin-top:6px"></div>
+          <div id="rollup-wrap">
+            <h3 style="margin-top:18px">Bilan hebdomadaire</h3>
+            <table id="rollup-table"></table>
+            <div class="note" id="rollup-note"></div>
           </div>
 
           <div class="zone-legend">
@@ -452,23 +443,124 @@
     }).join("");
   }
 
-  renderWorkout("chart-mon", [{ min: 60, zone: "z2" }]);
-
-  renderWorkout("chart-tue", [
+  const TUE_SEUIL = [
     { min: 15, zone: "z2" },
     { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
     { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
     { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
     { min: 6, zone: "z4" },
     { min: 10, zone: "z2" }
-  ]);
+  ];
+  const THU_SEUIL_COURT = [
+    { min: 15, zone: "z2" },
+    { min: 2, zone: "z4" }, { min: 2, zone: "z1" },
+    { min: 2, zone: "z4" }, { min: 2, zone: "z1" },
+    { min: 2, zone: "z4" }, { min: 2, zone: "z1" },
+    { min: 2, zone: "z4" },
+    { min: 9, zone: "z2" }
+  ];
+  const VELO_70_3 = [
+    { min: 15, zone: "z2" },
+    { min: 10, zone: "z3" }, { min: 5, zone: "z1" },
+    { min: 10, zone: "z3" }, { min: 5, zone: "z1" },
+    { min: 10, zone: "z3" },
+    { min: 10, zone: "z2" }
+  ];
 
-  renderWorkout("chart-wed", [{ min: 60, zone: "z2" }]);
+  const WEEKS = {
+    w0727: {
+      label: "Semaine du 27/07 (à venir)",
+      note: "Prochaine semaine déjà construite par plan-my-week.",
+      days: [
+        { day: "Lundi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", steps: [{ min: 60, zone: "z2" }] }] },
+        { day: "Mardi", desc: "Seuil brisé 4x6' R3', 58 min", options: [{ label: "", steps: TUE_SEUIL }] },
+        { day: "Mercredi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", steps: [{ min: 60, zone: "z2" }] }] },
+        { day: "Jeudi", desc: "Footing facile, 45 min Z2", options: [{ label: "", steps: [{ min: 45, zone: "z2" }] }] },
+        { day: "Ven-Sam", desc: "Trajet vers Annecy, rien de prévu", rest: true },
+        { day: "Dimanche", desc: "Reprise libre à Annecy, au choix", options: [
+          { label: "Option: Vélo 2h", steps: [{ min: 120, zone: "z2", label: "Option: Vélo 2h" }] },
+          { label: "Option: CAP 1h30", steps: [{ min: 90, zone: "z2", label: "Option: CAP 1h30" }] }
+        ]}
+      ],
+      rollup: {
+        rows: [
+          ["Natation (Lun + Mer)", "1h50", "—"],
+          ["Course, hors dimanche (Mar + Jeu)", "1h43", "~22,0 km"],
+          ["Dimanche, si option course", "+1h30", "+~17,1 km"],
+          ["Dimanche, si option vélo", "+2h00", "—"]
+        ],
+        totals: [
+          ["Total si dimanche = course", "~5h03", "~39,1 km course"],
+          ["Total si dimanche = vélo", "~5h33", "~22,0 km course + vélo"]
+        ],
+        note: "Écart avec la cible (~8h) : les séances planifiées ne totalisent que ~5h-5h30. Ce n'est pas une erreur — la cible ~8h suppose du volume libre non planifié (vélo/nage pendant les vacances), pas des séances fantômes ajoutées ici."
+      }
+    },
+    w0803: {
+      label: "Semaine du 03/08 (Annecy → Embrun)",
+      note: "Volume cible ~7h, -12% volontaire avant Embrunman (approche affûtage).",
+      days: [
+        { day: "Lundi", desc: "Natation ou vélo facile, au choix, 1h Z1-Z2", options: [
+          { label: "Option: Natation 1h", steps: [{ min: 60, zone: "z2", label: "Natation 1h" }] },
+          { label: "Option: Vélo 1h", steps: [{ min: 60, zone: "z2", label: "Vélo 1h" }] }
+        ]},
+        { day: "Mardi", desc: "Vélo qualité, allure 70.3, ~70 min", options: [{ label: "", steps: VELO_70_3 }] },
+        { day: "Mercredi", desc: "Facile, natation ou footing, au choix", options: [
+          { label: "Option: Natation 45'", steps: [{ min: 45, zone: "z2", label: "Natation 45'" }] },
+          { label: "Option: Footing 45'", steps: [{ min: 45, zone: "z2", label: "Footing 45'" }] }
+        ]},
+        { day: "Jeudi", desc: "Course qualité, seuil court, ~38 min", options: [{ label: "", steps: THU_SEUIL_COURT }] },
+        { day: "Vendredi", desc: "Natation facile, 45 min Z1-Z2", options: [{ label: "", steps: [{ min: 45, zone: "z2" }] }] },
+        { day: "Samedi", desc: "Trajet Annecy → Embrun, rien de prévu", rest: true },
+        { day: "Dimanche", desc: "Sortie longue légère protégée, 70 min Z1-Z2", options: [{ label: "", steps: [{ min: 70, zone: "z2" }] }] }
+      ],
+      rollup: {
+        rows: [
+          ["Vélo qualité (Mar, fixe)", "1h10", "—"],
+          ["Course (Jeu + Dim, fixe)", "1h48", "~21,25 km"],
+          ["Natation (Ven, fixe)", "45 min", "—"],
+          ["Lundi, flexible (nat. ou vélo)", "+1h00", "—"],
+          ["Mercredi, flexible (nat. ou footing)", "+45 min", "+~8,5 km si footing"]
+        ],
+        totals: [
+          ["Total fixe", "~3h43", "~21,25 km course"],
+          ["Total avec flexible (max)", "~5h28", "~29,75 km course si footing choisi"]
+        ],
+        note: "Écart avec la cible (~7h) : même schéma que la semaine précédente — le fixe + flexible plafonne à ~5h30. L'écart vient du volume libre non planifié à Annecy/Embrun, pas d'un oubli."
+      }
+    }
+  };
 
-  renderWorkout("chart-thu", [{ min: 45, zone: "z2" }]);
+  function renderWeek(key) {
+    const w = WEEKS[key];
+    document.getElementById("sessions-title").textContent = "Séances, " + w.label;
+    const daysEl = document.getElementById("sessions-days");
+    daysEl.innerHTML = w.days.map((d, i) => {
+      if (d.rest) {
+        return `<div class="day-block rest"><div class="day-block-head"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div></div>`;
+      }
+      const bars = d.options.map((opt, j) => `<div class="workout-bar" id="w-${key}-${i}-${j}" style="${j > 0 ? 'margin-top:6px' : ''}"></div>`).join("");
+      return `<div class="day-block"><div class="day-block-head"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div>${bars}</div>`;
+    }).join("");
+    w.days.forEach((d, i) => {
+      if (d.rest) return;
+      d.options.forEach((opt, j) => renderWorkout(`w-${key}-${i}-${j}`, opt.steps));
+    });
+    const rt = document.getElementById("rollup-table");
+    const rowsHtml = w.rollup.rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+    const totalsHtml = w.rollup.totals.map(r => `<tr class="total"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+    rt.innerHTML = `<tr><th>Activité</th><th>Durée</th><th>Distance estimée</th></tr>${rowsHtml}${totalsHtml}`;
+    document.getElementById("rollup-note").textContent = w.rollup.note;
+  }
 
-  renderWorkout("chart-sun-bike", [{ min: 120, zone: "z2", label: "Option: Vélo 2h" }]);
-  renderWorkout("chart-sun-run", [{ min: 90, zone: "z2", label: "Option: CAP 1h30" }]);
+  const weekSelect = document.getElementById("week-select");
+  Object.keys(WEEKS).forEach(key => {
+    const opt = document.createElement("option");
+    opt.value = key; opt.textContent = WEEKS[key].label;
+    weekSelect.appendChild(opt);
+  });
+  weekSelect.addEventListener("change", () => renderWeek(weekSelect.value));
+  renderWeek("w0727");
 
   document.querySelectorAll(".nav-item").forEach(item => {
     item.addEventListener("click", () => {
