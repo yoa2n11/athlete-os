@@ -65,3 +65,13 @@ Le dashboard (`dashboard.html`) a déjà une structure à onglets (Vue jour, His
 - Pas de log d'exécution dédié pour les compétences (ex. un fichier `health/skill-runs.json`) — la "dernière exécution" affichée se déduit des fichiers déjà produits (dates de reviews/races), pas d'un nouveau mécanisme de tracking à construire.
 - La projection CTL/ATL reste une approximation simple (volume prévu → charge estimée), pas un modèle de charge d'entraînement (TSS/IF) complet — hors périmètre pour cette spec.
 - Le contenu des fichiers de blocs eux-mêmes ne change pas (déjà traité dans la spec précédente) — cette spec ne fait que les **afficher** mieux.
+
+## Addendum 2026-07-24 — Détail blessures dans l'onglet Zones
+
+Contexte : import d'un handoff externe (projet claude.ai/design "Athlete OS application", 6 maquettes React) proposant une page "Santé" dédiée. Décision : pas de nouvel onglet — les maquettes Planning et Santé sont fusionnées dans Vue jour et Zones respectivement. Planning est déjà entièrement construit dans Vue jour (cartes jour par jour, bilan hebdo) ; seul le détail blessures manquait.
+
+Changement :
+- Nouvelle section dans l'onglet **Zones**, sous les 3 tableaux de zones : une carte par zone à risque (Achille droit, TFL gauche, ischio-jambier) avec statut, historique réel, symptômes, monitoring — sourcé depuis `athlete-profile.md` (section "Constraints and health"), pas depuis le texte générique de la maquette.
+- Note "pattern de blessure identifié" basée sur les déclencheurs confirmés par l'athlète (2026-07-23 : hausse de volume trop rapide en prépa marathon ; 2026-07-24 : reprise trop rapide après une grosse course).
+- La carte compacte "Santé, zones à surveiller" de Vue jour reste inchangée mais pointe désormais vers cette nouvelle section (lien "voir détail").
+- Toujours aucune base de données, aucun backend — fichier statique régénéré à la main, comme le reste du dashboard.

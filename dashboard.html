@@ -99,6 +99,14 @@
   .zone-card .status { font-size: 12px; margin-top: 6px; }
   .zone-card .status.ok { color: var(--good); }
   .zone-card .status.watch { color: var(--warn); }
+  .status.ok { color: var(--good); }
+  .status.watch { color: var(--warn); }
+  .health-detail { display: flex; flex-direction: column; gap: 10px; }
+  .health-card { background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--good); border-radius: 8px; padding: 12px 14px; }
+  .health-card.watch { border-left-color: var(--warn); }
+  .health-card-head { font-size: 13px; margin-bottom: 8px; }
+  .health-card-body { font-size: 12px; color: var(--muted); line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+  .health-card-body strong { color: var(--text); }
 
   .phases { grid-column: span 12; }
   .phase-list { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
@@ -280,6 +288,7 @@
             <div class="zone-card"><div class="name"><span class="dot ok"></span> TFL</div><div class="status ok">OK</div></div>
             <div class="zone-card"><div class="name"><span class="dot watch"></span> Ischio-jambier</div><div class="status watch">À surveiller</div></div>
           </div>
+          <div class="note" style="margin-top:8px"><a href="#" onclick="document.querySelector('.nav-item[data-page=zones]').click(); document.getElementById('zones-sante').scrollIntoView({behavior:'smooth'}); return false;" style="color:var(--accent-2)">Voir le détail (historique, symptômes, monitoring) →</a></div>
         </div>
         <div class="card phases">
           <h3>Bloc marathon, phases</h3>
@@ -386,6 +395,36 @@
           <div class="zrow"><div class="zlabel z4">Z4</div><div>1:32-1:36/100m</div><div>VO2max / rapide</div></div>
           <div class="zrow"><div class="zlabel z5">Z5</div><div>Plus rapide que 1:32/100m</div><div>Sprint</div></div>
           <div class="zsub">CSS estimé par intervals.icu (2026-07-24), pas un vrai test CSS (2x400m/2x200m chronométrés) — bon point de départ, à affiner.</div>
+        </div>
+
+        <div class="card" id="zones-sante" style="grid-column: span 12;">
+          <h3>Historique de blessures & vigilance</h3>
+          <div class="health-detail">
+            <div class="health-card ok">
+              <div class="health-card-head"><span class="dot ok"></span> <strong>Achille droit</strong> — <span class="status ok">OK</span></div>
+              <div class="health-card-body">
+                <div><strong>Historique :</strong> tendinopathie pendant la prépa marathon de La Rochelle, 2022.</div>
+                <div><strong>Monitoring :</strong> lié au déclencheur confirmé — hausse de volume course trop rapide en bloc marathon, pas l'intensité. Surveillance renforcée dès qu'une semaine dépasse la marge des ~10%.</div>
+              </div>
+            </div>
+            <div class="health-card ok">
+              <div class="health-card-head"><span class="dot ok"></span> <strong>TFL gauche</strong> (tensor fasciae latae) — <span class="status ok">OK</span></div>
+              <div class="health-card-body">
+                <div><strong>Historique :</strong> gêne pendant la prépa marathon de La Rochelle, 2023 ; gérée et résorbée par renforcement ciblé et kiné.</div>
+                <div><strong>Monitoring :</strong> même déclencheur volume que l'Achille — travail de renforcement/mobilité hebdomadaire maintenu spécifiquement pour cette zone.</div>
+              </div>
+            </div>
+            <div class="health-card watch">
+              <div class="health-card-head"><span class="dot watch"></span> <strong>Ischio-jambier</strong> — <span class="status watch">À surveiller</span></div>
+              <div class="health-card-body">
+                <div><strong>Historique :</strong> tension mineure le 31/05/2026, dans la fenêtre de reprise après le Half Angers (70.3, 17/05). Gérée par baisse du volume course + renforcement, résolue. Twinge bref les 19-20/07 après un enchaînement vélo samedi + sortie longue dimanche — même zone, à suivre séparément des deux anciennes.</div>
+                <div><strong>Monitoring :</strong> déclencheur différent des deux autres — pas une hausse de volume en bloc marathon, mais une reprise trop rapide après un gros effort. Justifie la semaine 1 volontairement sans séance dure après l'Embrunman (17/08), même logique que la reprise post-Half Angers.</div>
+              </div>
+            </div>
+          </div>
+          <div class="note" style="margin-top:10px">
+            <strong>Pattern de blessure identifié</strong> (confirmé par l'athlète le 23/07/2026 et complété le 24/07/2026) : les blessures arrivent soit lors d'une hausse trop rapide du volume course en prépa marathon (Achille, TFL), soit lors d'une reprise trop rapide après une grosse course (ischio-jambier). Dans les deux cas, c'est le volume/la vitesse de reprise qui compte, pas l'intensité ou le travail en côtes — d'où la marge ~10%/semaine et les semaines de reprise allégées après chaque course majeure.
+          </div>
         </div>
       </div>
     </div>
