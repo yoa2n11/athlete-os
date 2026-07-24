@@ -48,10 +48,10 @@ Vue d'ensemble des grandes phases jusqu'à ton dernier objectif A. **Volontairem
 | Phase | Dates (approx.) | Focus |
 |---|---|---|
 | Bloc marathon Amsterdam | 17/08 → 18/10/2026 | Détaillé ci-dessus |
-| Récup post-Amsterdam | 19/10 → 01/11/2026 | Coupure active, aucune séance dure — même logique que la reprise post-Embrunman |
-| Affûtage court Semi Boulogne-Billancourt | 02/11 → 15/11/2026 | Objectif B — s'appuie sur la forme marathon déjà construite, pas un nouveau bloc de fond |
-| Récup + base légère | 16/11 → 19/12/2026 | Coupure après l'enchaînement automnal (2 courses en 1 mois), reprise progressive du volume facile, fenêtre pour un peu de VMA/côtes si utile (même logique que la phase base d'Amsterdam) |
-| Bloc marathon Séville | 20/12/2026 → 21/02/2027 | Objectif A — bloc complet ~9 semaines, structure attendue similaire à Amsterdam (seuil brisé + AS42 progressif), à confirmer avec tes données de fin d'année |
+| [training/2026-10-19-recup-post-amsterdam.md](2026-10-19-recup-post-amsterdam.md) | 19/10 → 01/11/2026 | Coupure active, aucune séance dure — même logique que la reprise post-Embrunman |
+| [training/2026-11-02-bloc-semi-boulogne.md](2026-11-02-bloc-semi-boulogne.md) | 02/11 → 15/11/2026 | Objectif B — s'appuie sur la forme marathon déjà construite, pas un nouveau bloc de fond |
+| [training/2026-11-16-recup-base.md](2026-11-16-recup-base.md) | 16/11 → 19/12/2026 | Coupure après l'enchaînement automnal (2 courses en 1 mois), reprise progressive du volume facile, fenêtre pour un peu de VMA/côtes si utile (même logique que la phase base d'Amsterdam) |
+| [training/2026-12-20-bloc-marathon-seville.md](2026-12-20-bloc-marathon-seville.md) | 20/12/2026 → 21/02/2027 | Objectif A — bloc complet ~9 semaines, structure attendue similaire à Amsterdam (seuil brisé + AS42 progressif), à confirmer avec tes données de fin d'année |
 | **Course** | **21/02/2027** | **Marathon de Séville — objectif A** |
 
 À noter : le Semi de Boulogne-Billancourt juste après Amsterdam est un enchaînement serré (un mois entre les deux courses) — à surveiller à l'approche selon comment Amsterdam se sera réellement passé, plutôt que de le figer maintenant.
