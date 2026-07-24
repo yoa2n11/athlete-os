@@ -122,6 +122,25 @@
   .day-row .day { color: var(--accent-2); font-weight: 600; min-width: 90px; }
   .day-row .desc { color: var(--text); flex: 1; text-align: right; }
 
+  /* Workout step charts, one per activity (intervals.icu style: width = duration, height = intensity) */
+  .day-block { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .day-block:last-child { border-bottom: none; }
+  .day-block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .day-block-head .day { color: var(--accent-2); font-weight: 600; font-size: 13px; min-width: 90px; }
+  .day-block-head .desc { color: var(--text); font-size: 12.5px; text-align: right; }
+  .day-block.rest .desc { color: var(--muted); font-style: italic; }
+  .workout-bar { display: flex; align-items: flex-end; height: 48px; border-radius: 6px; overflow: hidden; gap: 1px; background: rgba(255,255,255,0.02); }
+  .wseg { position: relative; display: flex; align-items: center; justify-content: center; min-width: 2px; }
+  .wseg.z1 { background: rgba(60,200,180,0.35); }
+  .wseg.z2 { background: rgba(60,200,180,0.55); }
+  .wseg.z3 { background: var(--warn); }
+  .wseg.z4 { background: var(--accent); }
+  .wseg .wlabel { font-size: 9.5px; font-weight: 700; color: #0a0e15; white-space: nowrap; }
+  .zone-legend { display: flex; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+  .zone-legend .lg { display: flex; align-items: center; gap: 6px; }
+  .zone-legend .sw { width: 10px; height: 10px; border-radius: 3px; }
+  .sw.z1 { background: rgba(60,200,180,0.35); } .sw.z2 { background: rgba(60,200,180,0.55); } .sw.z3 { background: var(--warn); } .sw.z4 { background: var(--accent); }
+
   /* Zones tab */
   .zones-table { grid-column: span 12; }
   .zrow { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 16px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; align-items: center; }
@@ -257,13 +276,44 @@
         </div>
         <div class="card sessions">
           <h3>Séances, semaine du 27/07 (à venir)</h3>
-          <div class="note">Prochaine semaine déjà construite par plan-my-week.</div>
-          <div class="day-row"><div class="day">Lundi</div><div class="desc">Natation eau libre</div></div>
-          <div class="day-row"><div class="day">Mardi</div><div class="desc">Course qualité: seuil 4x6' R2'</div></div>
-          <div class="day-row"><div class="day">Mercredi</div><div class="desc">Natation eau libre</div></div>
-          <div class="day-row"><div class="day">Jeudi</div><div class="desc">Footing facile</div></div>
-          <div class="day-row"><div class="day">Ven-Sam</div><div class="desc">Trajet vers Annecy, rien de prévu</div></div>
-          <div class="day-row"><div class="day">Dimanche</div><div class="desc">Reprise libre à Annecy</div></div>
+          <div class="note">Prochaine semaine déjà construite par plan-my-week. Largeur des barres = durée, hauteur = intensité (plus haut et plus orangé = plus dur), comme sur intervals.icu.</div>
+
+          <div class="day-block">
+            <div class="day-block-head"><span class="day">Lundi</span><span class="desc">Natation eau libre, 1h Z2</span></div>
+            <div class="workout-bar" id="chart-mon"></div>
+          </div>
+
+          <div class="day-block">
+            <div class="day-block-head"><span class="day">Mardi</span><span class="desc">Seuil brisé 4x6' R3', 58 min</span></div>
+            <div class="workout-bar" id="chart-tue"></div>
+          </div>
+
+          <div class="day-block">
+            <div class="day-block-head"><span class="day">Mercredi</span><span class="desc">Natation eau libre, 1h Z2</span></div>
+            <div class="workout-bar" id="chart-wed"></div>
+          </div>
+
+          <div class="day-block">
+            <div class="day-block-head"><span class="day">Jeudi</span><span class="desc">Footing facile, 45 min Z2</span></div>
+            <div class="workout-bar" id="chart-thu"></div>
+          </div>
+
+          <div class="day-block rest">
+            <div class="day-block-head"><span class="day">Ven-Sam</span><span class="desc">Trajet vers Annecy, rien de prévu</span></div>
+          </div>
+
+          <div class="day-block">
+            <div class="day-block-head"><span class="day">Dimanche</span><span class="desc">Reprise libre à Annecy: vélo 2h OU CAP 1h30, Z2, au choix</span></div>
+            <div class="workout-bar" id="chart-sun-bike"></div>
+            <div class="workout-bar" id="chart-sun-run" style="margin-top:6px"></div>
+          </div>
+
+          <div class="zone-legend">
+            <div class="lg"><span class="sw z1"></span> Z1, récup/très facile</div>
+            <div class="lg"><span class="sw z2"></span> Z2, aérobie/endurance</div>
+            <div class="lg"><span class="sw z3"></span> Z3, tempo/allure marathon</div>
+            <div class="lg"><span class="sw z4"></span> Z4, seuil</div>
+          </div>
         </div>
       </div>
     </div>
@@ -388,6 +438,37 @@
   }
   renderChart("chart-hours", hours, hoursLabels, "hours", "h");
   renderChart("chart-vert", vert, hoursLabels, "vertm", "");
+
+  const ZONE_HEIGHT = { z1: 30, z2: 45, z3: 68, z4: 90 };
+
+  function renderWorkout(id, steps) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const total = steps.reduce((s, x) => s + x.min, 0);
+    el.innerHTML = steps.map(s => {
+      const pct = (s.min / total) * 100;
+      const showLabel = pct > 7;
+      return `<div class="wseg ${s.zone}" style="width:${pct}%;height:${ZONE_HEIGHT[s.zone]}%">${showLabel ? `<span class="wlabel">${s.label || s.min + "'"}</span>` : ""}</div>`;
+    }).join("");
+  }
+
+  renderWorkout("chart-mon", [{ min: 60, zone: "z2" }]);
+
+  renderWorkout("chart-tue", [
+    { min: 15, zone: "z2" },
+    { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
+    { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
+    { min: 6, zone: "z4" }, { min: 3, zone: "z1" },
+    { min: 6, zone: "z4" },
+    { min: 10, zone: "z2" }
+  ]);
+
+  renderWorkout("chart-wed", [{ min: 60, zone: "z2" }]);
+
+  renderWorkout("chart-thu", [{ min: 45, zone: "z2" }]);
+
+  renderWorkout("chart-sun-bike", [{ min: 120, zone: "z2", label: "Option: Vélo 2h" }]);
+  renderWorkout("chart-sun-run", [{ min: 90, zone: "z2", label: "Option: CAP 1h30" }]);
 
   document.querySelectorAll(".nav-item").forEach(item => {
     item.addEventListener("click", () => {
