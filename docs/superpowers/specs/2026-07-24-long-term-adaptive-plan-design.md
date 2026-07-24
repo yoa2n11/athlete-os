@@ -84,3 +84,49 @@ Une fois ce plan implémenté, la compétence `long-term-plan` est invoquée une
 - Les zones/allures pour le Semi Boulogne-Billancourt (allure cible semi) ne sont pas encore fixées avec l'athlète — à définir plus tard, pas un blocage pour construire la structure du bloc maintenant.
 - Rien au-delà de Séville (21/02/2027) : pas de course connue après, donc pas de plan à construire, cohérent avec YAGNI.
 - Les améliorations du dashboard (CTL/ATL graphique, historique détaillé, zones multi-sports, totaux enrichis, page compétences) font l'objet d'une spec séparée, pas traitées ici.
+
+## Format des fichiers de bloc
+
+Chaque bloc de la feuille de route est un fichier Markdown autonome, lisible par `plan-my-week` et `long-term-plan`.
+
+- Titre : nom du bloc et dates exactes de début et de fin.
+- Objectif : phrase courte décrivant l'objectif spécifique du bloc.
+- Semaine par semaine : pour chaque semaine, indiquer le volume cible de course à pied, le type principal de séances, une ligne "Pourquoi" et les points de vigilance.
+- Sécurité : une section finale de règles d'arrêt ou de réduction de charge.
+- Transparence : toute valeur non encore fixée par l'athlète (allure semi, allure Séville, etc.) doit être signalée comme "à confirmer".
+
+## Règles de calcul et invariants
+
+- Le point de départ de chaque nouveau bloc est le dernier volume hebdomadaire réel connu, jamais une estimation CSV arbitraire.
+- Les dates de début/fin de bloc restent fixes : elles sont ancrées aux jalons de course ou à la transition planifiée, et ne sont jamais reculées/avancées par le recalcul adaptatif.
+- La progression du volume est une courbe dégressive : forte croissance initiale puis réduction du rythme d'augmentation, avec un down-week planifié au milieu du build si le bloc compte 4 semaines de construction ou plus.
+- Les écarts réels/prévus ≤ 15% sont traités comme variance normale et n'entraînent aucun changement automatique.
+- Les écarts > 15% déclenchent un recalcul des semaines restantes du bloc courant si le bloc peut les absorber sans dépasser ~10% d'ajustement d'une semaine à l'autre. Si le bloc ne peut pas absorber l'écart, la cascade se propage vers les blocs futurs.
+- Un flag fatigue/blessure actif arrête toute augmentation de volume, même si les calculs demandent une hausse.
+
+## Spécification de `plan.md`
+
+Le fichier `training/plan.md` devient un index macro, pas un plan détaillé.
+
+- Il liste les blocs et leurs dates.
+- Il inclut un court résumé de l'objectif général jusqu'à Séville.
+- Il renvoie par lien vers chaque fichier de bloc détaillé.
+- Il conserve le contexte de données utilisé pour la construction du plan long terme, y compris la date de la dernière donnée réelle prise en compte.
+
+## Critères d'acceptation
+
+- `training/plan.md` référence explicitement tous les blocs jusqu'à Séville et ne contient plus le détail exact de chaque semaine.
+- Les 4 fichiers suivants sont présents et structurés selon le template :
+  - `training/2026-10-19-recup-post-amsterdam.md`
+  - `training/2026-11-02-bloc-semi-boulogne.md`
+  - `training/2026-11-16-recup-base.md`
+  - `training/2026-12-20-bloc-marathon-seville.md`
+- Le document de spécification décrit le mécanisme adaptatif de `weekly-review` avec seuil de 15% et cascade explicite.
+- Toute donnée inconnue est marquée comme « à confirmer » et n'est pas inscrite comme un chiffre définitif.
+- Les changements de volume se basent toujours sur des chiffres calculés, jamais sur des valeurs inventées.
+
+## Suivi et relecture
+
+- Une fois les fichiers créés, relire chaque bloc pour vérifier que le volume cible, la structure de phase et les règles de sécurité sont cohérents avec le template général.
+- Vérifier que le texte explicite les points d'arrêt : course cible, déconnexion entre performance réelle et plan, et fatigue/bles­sure.
+- Si un bloc est reconstruit après une review, noter clairement dans le bloc que la version est issue d'un ajustement adaptatif, avec la raison courte et l'impact sur les semaines restantes.

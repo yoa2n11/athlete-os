@@ -1,17 +1,27 @@
-# Récup + Base légère — 16/11 au 19/12/2026
+# Récup + base légère — 16 novembre au 20 décembre 2026
 
-Bloc transitional de récupération suivi d'une montée douce vers une base d'entraînement régulière (pas de course cible à la fin). Template "Récup → Base" : objectif remettre l'athlète sur un socle 6-8h/semaine (toutes disciplines confondues) avant le bloc marathon Séville.
+Bloc de transition, pas de course à la fin — objectif : revenir progressivement vers la base habituelle (6-8h/semaine toutes activités) avant le démarrage du bloc marathon Séville le 21/12. Template "récup → base" (voir .claude/skills/long-term-plan/SKILL.md).
 
 ## Semaine 1 — 16 au 22 novembre
-- ~2h de course à pied, Z1 majoritaire, aucune séance dure
-- Reprendre les activités complémentaires (natation/vélo) en volume léger
-- Pourquoi : prolonger la récupération après le semi et stabiliser le sommeil/récupération
+- ~1h30 de course à pied, Z1, récup post-Semi Boulogne
+- Pourquoi : le semi du 15/11 reste une course, pas un footing — vraie récup avant de reconstruire
 
-## Semaines 2-5 — 23 novembre au 19 décembre — Base légère
-- Progression progressive vers ~6-8h/semaine total (course + cross-training), augmentation hebdo modérée (~10% max si toléré)
-- Séances structurées limitées : 1 séance de qualité par semaine maximum (VMA courte ou seuil léger selon ressenti)
-- Sortie longue augmentant doucement jusqu'à 80-90% de la durée cible de la base
+## Semaine 2 — 23 au 29 novembre
+- ~2h30 de course à pied (+67%, saut normal en sortie de récup profonde)
+- Toujours Z1-Z2, aucune séance de qualité
+
+## Semaine 3 — 30 novembre au 06 décembre
+- ~3h de course à pied (+20%)
+- Reprise progressive du rythme habituel (nat/vélo en plus si les jambes le permettent)
+
+## Semaine 4 — 07 au 13 décembre
+- ~3h20 de course à pied (+11%)
+- Toujours aucune séance dure, priorité à la régularité
+
+## Semaine 5 — 14 au 20 décembre
+- ~3h30 de course à pied (+5%)
+- Base atteinte pour démarrer le bloc marathon Séville le lendemain (21/12)
 
 ## Règles de sécurité
-- Tout signal de douleur persistante : maintenir volume ou réduire plutôt que d'augmenter
-- Un flag fatigue/bles­sure bloque toute hausse automatique
+- Aucune séance dure sur ce bloc entier
+- Si fatigue ou gêne persistante fin novembre, prolonger d'une semaine avant le bloc Séville plutôt que de forcer la date
