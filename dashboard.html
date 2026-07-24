@@ -385,15 +385,27 @@
 
     <!-- TOTAUX -->
     <div class="page" id="page-totaux">
-      <div class="page-header"><h2>Totaux</h2><div class="date">8 dernières semaines</div></div>
+      <div class="page-header"><h2>Totaux</h2>
+        <select id="totaux-period">
+          <option value="8">8 dernières semaines</option>
+          <option value="12">12 dernières semaines</option>
+          <option value="21">21 dernières semaines</option>
+        </select>
+      </div>
       <div class="grid">
-        <div class="card volume">
-          <h3>Volume hebdomadaire (heures)</h3>
-          <div class="chart" id="chart-hours"></div>
+        <div class="card" style="grid-column: span 12;">
+          <h3>Volume hebdomadaire par sport (heures)</h3>
+          <div class="chart" id="chart-sport-split" style="height:160px"></div>
+          <div class="zone-legend" style="margin-top:10px; border-top:none; padding-top:0;">
+            <div class="lg"><span class="sw" style="background:var(--accent)"></span> Course</div>
+            <div class="lg"><span class="sw" style="background:var(--accent-2)"></span> Vélo</div>
+            <div class="lg"><span class="sw" style="background:var(--warn)"></span> Natation</div>
+          </div>
+          <div class="note" id="totaux-gap-note" style="margin-top:8px"></div>
         </div>
-        <div class="card vert">
-          <h3>Dénivelé hebdomadaire (m)</h3>
-          <div class="chart" id="chart-vert"></div>
+        <div class="card" style="grid-column: span 12;">
+          <h3>Prévu vs réel (semaines couvertes par un bloc)</h3>
+          <table id="prevu-reel-table"></table>
         </div>
       </div>
     </div>
@@ -449,25 +461,72 @@
 </div>
 
 <script>
-  const hours = [1.5, 6.9, 7.1, 9.2, 8.0, 7.2, 9.2, 1.7];
-  const hoursLabels = ["S23","S24","S25","S26","S27","S28","S29","S30"];
-  const vert = [1039, 801, 713, 1327, 1006, 1245, 1248, 138];
+  // Volume hebdo par sport, semaines ISO 2026 (intervals.icu). 0 = pas de donnée fiable (source Strava masquée avant mi-avril).
+  const WEEKLY_SPORT = {
+    labels: ["S7","S9","S10","S11","S12","S13","S14","S16","S17","S18","S19","S20","S23","S24","S25","S26","S27","S28","S29","S30"],
+    course:   [0,   0,   0,   0,   0,   0,   0,   0,   1.6, 4.0, 2.3, 1.5, 0,   2.0, 2.9, 2.8, 3.9, 1.5, 4.5, 1.7],
+    velo:     [0.9, 0.5, 1.1, 1.0, 1.0, 0.7, 1.2, 1.0, 5.3, 3.4, 3.8, 0.8, 1.5, 4.0, 2.2, 5.9, 2.8, 4.5, 4.1, 0.0],
+    natation: [0,   0,   0,   0,   0,   0,   0,   0,   0,   1.6, 1.2, 0.8, 0,   0.9, 1.4, 0,   0.6, 1.2, 0,   0]
+  };
 
-  function renderChart(id, values, labels, cls, unit) {
+  function renderSportSplit(id, periodWeeks) {
     const el = document.getElementById(id);
     if (!el) return;
-    const max = Math.max(...values);
-    el.innerHTML = values.map((v, i) => {
-      const h = Math.max(4, Math.round((v / max) * 110));
+    const n = WEEKLY_SPORT.labels.length;
+    const start = Math.max(0, n - periodWeeks);
+    const labels = WEEKLY_SPORT.labels.slice(start);
+    const course = WEEKLY_SPORT.course.slice(start);
+    const velo = WEEKLY_SPORT.velo.slice(start);
+    const nat = WEEKLY_SPORT.natation.slice(start);
+    const totals = labels.map((_, i) => course[i] + velo[i] + nat[i]);
+    const max = Math.max(...totals, 1);
+    el.innerHTML = labels.map((lab, i) => {
+      const hC = Math.round((course[i] / max) * 130);
+      const hV = Math.round((velo[i] / max) * 130);
+      const hN = Math.round((nat[i] / max) * 130);
       return `<div class="bar-col">
-        <div class="bar-val">${v}${unit}</div>
-        <div class="bar ${cls}" style="height:${h}px"></div>
-        <div class="bar-lab">${labels[i]}</div>
+        <div class="bar-val">${totals[i].toFixed(1)}h</div>
+        <div style="display:flex; flex-direction:column; width:100%;">
+          <div style="height:${hN}px; background:var(--warn); width:100%;"></div>
+          <div style="height:${hV}px; background:var(--accent-2); width:100%;"></div>
+          <div style="height:${hC}px; background:var(--accent); width:100%;"></div>
+        </div>
+        <div class="bar-lab">${lab}</div>
       </div>`;
     }).join("");
+    const gapNote = document.getElementById("totaux-gap-note");
+    if (gapNote) {
+      gapNote.textContent = start < 8 ? "Semaines avant mi-avril 2026 : répartition par sport incomplète (données synchronisées via Strava à l'époque, masquées par leur API) — le total course/vélo/natation de ces semaines-là est sous-estimé." : "";
+    }
   }
-  renderChart("chart-hours", hours, hoursLabels, "hours", "h");
-  renderChart("chart-vert", vert, hoursLabels, "vertm", "");
+
+  // Volume prévu (course, heures) par semaine, tiré des fichiers de blocs
+  const PLANNED_VS_REAL = [
+    { week: "S27 (13-19/07)", planned: null, actual: 3.9 },
+    { week: "S28 (20-26/07)", planned: null, actual: 1.5 },
+    { week: "S29 (27/07-02/08)", planned: 8.0, actual: null },
+  ];
+  function renderPrevuReel(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const rows = PLANNED_VS_REAL.map(r => {
+      const p = r.planned !== null ? r.planned.toFixed(1) + "h" : "—";
+      const a = r.actual !== null ? r.actual.toFixed(1) + "h" : "à venir";
+      let delta = "—";
+      if (r.planned !== null && r.actual !== null) {
+        const pct = Math.round(((r.actual - r.planned) / r.planned) * 100);
+        delta = (pct >= 0 ? "+" : "") + pct + "%";
+      }
+      return `<tr><td>${r.week}</td><td>${p}</td><td>${a}</td><td>${delta}</td></tr>`;
+    }).join("");
+    el.innerHTML = `<tr><th>Semaine</th><th>Prévu</th><th>Réel</th><th>Écart</th></tr>${rows}`;
+  }
+
+  renderSportSplit("chart-sport-split", 8);
+  renderPrevuReel("prevu-reel-table");
+  document.getElementById("totaux-period").addEventListener("change", e => {
+    renderSportSplit("chart-sport-split", parseInt(e.target.value, 10));
+  });
 
   const ZONE_HEIGHT = { z1: 30, z2: 45, z3: 68, z4: 90 };
 
