@@ -203,6 +203,13 @@
   .stop .obj.b { background: rgba(255,184,77,0.15); color: var(--warn); }
   .roadmap .note { color: var(--muted); font-size: 12px; margin-top: 18px; }
 
+  /* CTL/ATL chart */
+  #chart-ctl-atl svg { width: 100%; height: 100%; }
+  .ctl-line { fill: none; stroke: var(--accent-2); stroke-width: 2; }
+  .atl-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .ctl-proj { fill: none; stroke: var(--accent-2); stroke-width: 2; stroke-dasharray: 4 4; opacity: 0.6; }
+  .atl-proj { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 4; opacity: 0.6; }
+
   @media (max-width: 960px) {
     .shell { flex-direction: column; }
     .sidebar { width: 100%; display: flex; overflow-x: auto; padding: 12px 0; }
@@ -283,6 +290,16 @@
             <div class="phase-item">Phase 4 · 28/09-04/10</div>
             <div class="phase-item">Phase 5 · 05/10-18/10</div>
           </div>
+        </div>
+        <div class="card" style="grid-column: span 12;">
+          <h3>Forme / fatigue (CTL/ATL), 21 dernières semaines + projection</h3>
+          <div id="chart-ctl-atl" style="height:180px; position:relative;"></div>
+          <div class="zone-legend" style="margin-top:10px; border-top:none; padding-top:0;">
+            <div class="lg"><span class="sw z2" style="background:var(--accent-2)"></span> CTL réel (forme)</div>
+            <div class="lg"><span class="sw z4" style="background:var(--accent)"></span> ATL réel (fatigue)</div>
+            <div class="lg"><span class="sw z1" style="background:var(--muted)"></span> Projection (pointillés, basée sur le volume prévu des blocs à venir)</div>
+          </div>
+          <div class="note" style="margin-top:8px">Projection = approximation simple (volume prévu × ratio charge/heure récent), pas un modèle physiologique complet — indicatif, pas une prédiction garantie.</div>
         </div>
         <div class="card sessions">
           <div class="sessions-head">
@@ -583,6 +600,53 @@
   });
   weekSelect.addEventListener("change", () => renderWeek(weekSelect.value));
   renderWeek("w0727");
+
+  // CTL/ATL réel, 21 dernières semaines (intervals.icu, semaines ISO 2026)
+  const CTL_REAL = [45.4,49.6,47.1,47.0,49.2,51.2,50.5,54.9,60.0,62.7,65.4,66.4,62.9,59.9,60.7,59.2,58.8,62.6,62.3,65.0];
+  const ATL_REAL = [35.7,56.6,47.1,46.9,58.9,58.0,50.4,61.8,81.0,82.7,83.2,82.7,57.2,43.4,56.4,53.3,55.6,74.6,67.5,75.9];
+
+  // Projection : volume prévu (heures course) des blocs à venir, converti en charge
+  // approximative avec un ratio ~50 de charge par heure (dérivé des semaines réelles récentes,
+  // ex. semaine 9.2h -> charge 489 = ~53/h). 6 points de projection = 6 prochaines semaines du bloc Amsterdam.
+  const PLANNED_HOURS_NEXT = [2.5, 3.0, 3.5, 4.0, 4.3, 4.5]; // S1-S6 du bloc Amsterdam, training/2026-08-17-amsterdam-marathon-block.md
+  const LOAD_PER_HOUR = 50;
+  function projectCtlAtl(lastCtl, lastAtl, plannedHours) {
+    let ctl = lastCtl, atl = lastAtl;
+    const ctlProj = [ctl], atlProj = [atl];
+    plannedHours.forEach(h => {
+      const load = h * LOAD_PER_HOUR;
+      ctl = ctl + (load - ctl) * (1 - Math.exp(-7/42));
+      atl = atl + (load - atl) * (1 - Math.exp(-7/7));
+      ctlProj.push(Math.round(ctl*10)/10);
+      atlProj.push(Math.round(atl*10)/10);
+    });
+    return { ctlProj, atlProj };
+  }
+
+  function renderCtlAtlChart(id, ctlReal, atlReal, ctlProj, atlProj) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const all = [...ctlReal, ...atlReal, ...ctlProj, ...atlProj];
+    const max = Math.max(...all) * 1.1;
+    const w = 1000, h = 180;
+    const totalPoints = ctlReal.length + ctlProj.length - 1;
+    const stepX = w / totalPoints;
+    const toY = v => h - (v / max) * h;
+    const toPoints = (arr, offset) => arr.map((v, i) => `${(offset+i)*stepX},${toY(v)}`).join(" ");
+    const ctlRealPts = toPoints(ctlReal, 0);
+    const atlRealPts = toPoints(atlReal, 0);
+    const ctlProjPts = toPoints(ctlProj, ctlReal.length - 1);
+    const atlProjPts = toPoints(atlProj, atlReal.length - 1);
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polyline class="ctl-line" points="${ctlRealPts}"/>
+      <polyline class="atl-line" points="${atlRealPts}"/>
+      <polyline class="ctl-proj" points="${ctlProjPts}"/>
+      <polyline class="atl-proj" points="${atlProjPts}"/>
+    </svg>`;
+  }
+
+  const { ctlProj, atlProj } = projectCtlAtl(CTL_REAL[CTL_REAL.length-1], ATL_REAL[ATL_REAL.length-1], PLANNED_HOURS_NEXT);
+  renderCtlAtlChart("chart-ctl-atl", CTL_REAL, ATL_REAL, ctlProj, atlProj);
 
   document.querySelectorAll(".nav-item").forEach(item => {
     item.addEventListener("click", () => {
