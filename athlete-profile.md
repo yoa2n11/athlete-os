@@ -74,7 +74,21 @@
   - Z3 Tempo: 3:52-3:38/km
   - Z4 Threshold: 3:38-3:27/km
   - Z5 VO2max/Speed: faster than 3:27/km
-- To revisit: these are running zones only; cycling/swimming zones not yet estimated from data
+- **Cycling FTP**: ~260W, estimated by intervals.icu from power-duration profile (2026-07-24). Power zones (Coggan 7-zone model, standard % of FTP):
+  - Z1 Recovery: < 143W (< 55%)
+  - Z2 Endurance: 143-195W (55-75%)
+  - Z3 Tempo: 195-234W (75-90%)
+  - Z4 Threshold: 234-273W (90-105%)
+  - Z5 VO2max: 273-312W (105-120%)
+  - Z6 Anaerobic: 312-390W (120-150%)
+  - Z7 Neuromuscular: > 390W (> 150%)
+- **Swimming CSS (Critical Swim Speed)**: ~1:38/100m, estimated by intervals.icu (2026-07-24). Pace zones (standard CSS-based model):
+  - Z1 Easy: slower than 1:50/100m (CSS +12-20s)
+  - Z2 Steady/Aerobic: 1:46-1:50/100m (CSS +8-12s)
+  - Z3 Threshold/CSS: 1:36-1:40/100m (CSS ±2s)
+  - Z4 VO2max/Fast: 1:32-1:36/100m (CSS -2 to -6s)
+  - Z5 Sprint: faster than 1:32/100m (CSS -6s or more)
+- To revisit: FTP and CSS come from intervals.icu's own estimate, not a dedicated field test — treat as a solid starting point, not gospel; a real ramp test (bike) or CSS test set (swim) would sharpen these further
 
 See [training/plan.md](training/plan.md) for the current training phase built from this profile, and [reviews/2026-07-23-8-week-review.md](reviews/2026-07-23-8-week-review.md) for the training-data analysis behind the injury-trigger findings below.
 
