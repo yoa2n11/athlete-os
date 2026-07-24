@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Athlete OS — Dashboard</title>
+<title>Athlete OS: Dashboard</title>
 <style>
   :root {
     --bg: #0b0f14;
@@ -110,6 +110,26 @@
   .hr-z2 { background: rgba(61,220,132,0.15); color: var(--good); }
   .hr-z3 { background: rgba(255,184,77,0.15); color: var(--warn); }
 
+  /* Roadmap */
+  .roadmap { grid-column: span 12; }
+  .roadmap-track { position: relative; display: flex; justify-content: space-between; margin-top: 24px; padding: 0 4px; }
+  .roadmap-track::before {
+    content: ""; position: absolute; top: 7px; left: 4px; right: 4px; height: 2px;
+    background: var(--border);
+  }
+  .stop { position: relative; flex: 1; text-align: center; padding: 0 4px; }
+  .stop .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--panel); border: 2px solid var(--border); margin: 0 auto 12px; position: relative; z-index: 1; }
+  .stop.current .dot { background: var(--accent); border-color: var(--accent); }
+  .stop.goal-a .dot { background: var(--accent-2); border-color: var(--accent-2); }
+  .stop .date { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .stop .label { font-size: 12px; color: var(--text); margin-top: 4px; line-height: 1.4; }
+  .stop.current .label { color: var(--accent); font-weight: 600; }
+  .stop .obj { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .stop .obj.a { background: rgba(60,200,180,0.15); color: var(--accent-2); }
+  .stop .obj.b { background: rgba(255,184,77,0.15); color: var(--warn); }
+  .stop .obj.c { background: rgba(255,255,255,0.08); color: var(--muted); }
+  .roadmap .note { color: var(--muted); font-size: 12px; margin-top: 18px; }
+
   /* Coaching */
   .coaching { grid-column: span 12; }
   .coaching .overview { font-size: 14px; color: var(--text); margin-bottom: 18px; line-height: 1.6; }
@@ -124,6 +144,10 @@
   @media (max-width: 900px) {
     .hero, .readiness, .skills, .volume, .vert, .sessions, .paces, .insights { grid-column: span 12; }
     .insights { grid-template-columns: repeat(2, 1fr); }
+    .roadmap-track { flex-direction: column; gap: 18px; align-items: flex-start; text-align: left; }
+    .roadmap-track::before { display: none; }
+    .stop { text-align: left; padding-left: 20px; }
+    .stop .dot { margin: 0; position: absolute; left: 0; top: 2px; }
   }
 </style>
 </head>
@@ -140,7 +164,7 @@
       <h2>Objectif de l'année</h2>
       <div class="days">86</div>
       <div class="label">jours avant le départ</div>
-      <div class="race">Marathon d'Amsterdam — 18 octobre 2026</div>
+      <div class="race">Marathon d'Amsterdam, 18 octobre 2026</div>
       <div class="goal">Objectif : sub-2h40 (3:47/km)</div>
     </div>
 
@@ -174,7 +198,7 @@
     </div>
 
     <div class="card sessions">
-      <h2>Séances — semaine du 27/07 (à venir)</h2>
+      <h2>Séances : semaine du 27/07 (à venir)</h2>
       <div class="note">Aucune semaine n'est encore planifiée pour les jours restants de cette semaine (voici la prochaine semaine déjà construite).</div>
       <div class="day-row"><div class="day">Lundi</div><div class="desc">Natation eau libre</div></div>
       <div class="day-row"><div class="day">Mardi</div><div class="desc">Course qualité : seuil 4x6' R2'</div></div>
@@ -195,6 +219,46 @@
         <tr><td>16/07</td><td>9,7 km</td><td>5:17/km</td><td><span class="hr-tag hr-z1">125</span></td></tr>
         <tr><td>13/07</td><td>14,5 km</td><td>5:25/km</td><td><span class="hr-tag hr-z2">128</span></td></tr>
       </table>
+    </div>
+
+    <div class="card roadmap">
+      <h2>Feuille de route jusqu'à Séville</h2>
+      <div class="roadmap-track">
+        <div class="stop current">
+          <div class="dot"></div>
+          <div class="date">17/08 → 18/10</div>
+          <div class="label">Bloc marathon Amsterdam</div>
+          <span class="obj a">A</span>
+        </div>
+        <div class="stop">
+          <div class="dot"></div>
+          <div class="date">19/10 → 01/11</div>
+          <div class="label">Récup post-Amsterdam</div>
+        </div>
+        <div class="stop">
+          <div class="dot"></div>
+          <div class="date">15/11</div>
+          <div class="label">Semi Boulogne-Billancourt</div>
+          <span class="obj b">B</span>
+        </div>
+        <div class="stop">
+          <div class="dot"></div>
+          <div class="date">16/11 → 19/12</div>
+          <div class="label">Récup + base légère</div>
+        </div>
+        <div class="stop">
+          <div class="dot"></div>
+          <div class="date">20/12 → 21/02/27</div>
+          <div class="label">Bloc marathon Séville</div>
+        </div>
+        <div class="stop goal-a">
+          <div class="dot"></div>
+          <div class="date">21/02/2027</div>
+          <div class="label">Marathon de Séville</div>
+          <span class="obj a">A</span>
+        </div>
+      </div>
+      <div class="note">Macro seulement : le détail semaine par semaine de chaque bloc est construit au moment où il démarre réellement, pas projeté à l'avance.</div>
     </div>
 
     <div class="card coaching">

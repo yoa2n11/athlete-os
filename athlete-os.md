@@ -18,10 +18,12 @@ Bloc marathon détaillé (séances semaine par semaine, 17 août → 18 octobre)
 |---|---|---|
 | 15/08/2026 | Quart Embrunman (1,5km/44km/10km) | C — bonus, protéger la reprise du bloc marathon 2 jours après |
 | 18/10/2026 | Marathon d'Amsterdam | A — sub-2h40 minimum |
-| 15/11/2026 | Semi de Boulogne-Billancourt | B — après Amsterdam, hors bloc actuel |
+| 15/11/2026 | Semi de Boulogne-Billancourt | B — enchaînement serré après Amsterdam, à surveiller |
+| 21/02/2027 | Marathon de Séville | A — dernier objectif A de la séquence |
 
 Plan de course Embrunman : [races/2026-08-15-embrunman-race-plan.md](races/2026-08-15-embrunman-race-plan.md)
 Plan fueling & pacing Amsterdam : [races/2026-10-18-amsterdam-fueling-pacing-plan.md](races/2026-10-18-amsterdam-fueling-pacing-plan.md)
+Feuille de route macro jusqu'à Séville (phases, pas de détail semaine par semaine avant que chaque bloc démarre réellement) : [training/plan.md](training/plan.md#feuille-de-route-macro--jusquà-séville-21-février-2027)
 
 ## Dernière review hebdomadaire
 [reviews/2026-07-13.md](reviews/2026-07-13.md) — sortie longue exécutée avec contrôle (bon signe), mais stress/sommeil perturbés ont fait grimper la fatigue (ATL) plus que prévu ; légère gêne ischio-jambier notée (même zone qu'une déchirure légère du 31 mai, résolue) à surveiller à la reprise post-Embrunman.

@@ -41,6 +41,21 @@ Détail semaine par semaine des phases 1 à 5 déjà écrit dans [training/2026-
 
 Aucune hausse hebdomadaire de volume course à pied ne dépasse ~20% dans ce plan, et les hausses au-delà de 10% (S1→S2 : +20%, S2→S3 : +17%) sont justifiées explicitement : ce sont des semaines de reprise après une charge artificiellement basse (semaine 1 volontairement légère), pas une vraie charge de référence — cohérent avec les limites réelles de la règle des 10% (Nielsen et al. 2014 : le vrai risque vient des sauts sur une seule sortie, pas de la progression hebdomadaire lissée).
 
+## Feuille de route macro — jusqu'à Séville (21 février 2027)
+
+Vue d'ensemble des grandes phases jusqu'à ton dernier objectif A. **Volontairement macro, pas semaine par semaine** — le détail précis de chaque bloc sera construit au moment où il démarre réellement, avec tes vraies données de l'époque, pas des projections à 6 mois. C'est cohérent avec ta philosophie de coaching (cadre souple, pas un script figé écrit à l'avance).
+
+| Phase | Dates (approx.) | Focus |
+|---|---|---|
+| Bloc marathon Amsterdam | 17/08 → 18/10/2026 | Détaillé ci-dessus |
+| Récup post-Amsterdam | 19/10 → 01/11/2026 | Coupure active, aucune séance dure — même logique que la reprise post-Embrunman |
+| Affûtage court Semi Boulogne-Billancourt | 02/11 → 15/11/2026 | Objectif B — s'appuie sur la forme marathon déjà construite, pas un nouveau bloc de fond |
+| Récup + base légère | 16/11 → 19/12/2026 | Coupure après l'enchaînement automnal (2 courses en 1 mois), reprise progressive du volume facile, fenêtre pour un peu de VMA/côtes si utile (même logique que la phase base d'Amsterdam) |
+| Bloc marathon Séville | 20/12/2026 → 21/02/2027 | Objectif A — bloc complet ~9 semaines, structure attendue similaire à Amsterdam (seuil brisé + AS42 progressif), à confirmer avec tes données de fin d'année |
+| **Course** | **21/02/2027** | **Marathon de Séville — objectif A** |
+
+À noter : le Semi de Boulogne-Billancourt juste après Amsterdam est un enchaînement serré (un mois entre les deux courses) — à surveiller à l'approche selon comment Amsterdam se sera réellement passé, plutôt que de le figer maintenant.
+
 ## Ce qui pourrait ne pas coller à ta vie
 
 - La phase 0 (jusqu'au 15 août) suppose que tu gères Embrunman sans y ajouter de travail marathon-spécifique — si tu veux commencer à toucher un peu d'AS42 avant même Embrunman, dis-le.
