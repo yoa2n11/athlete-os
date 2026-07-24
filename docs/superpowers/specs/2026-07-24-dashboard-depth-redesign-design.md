@@ -75,3 +75,13 @@ Changement :
 - Note "pattern de blessure identifié" basée sur les déclencheurs confirmés par l'athlète (2026-07-23 : hausse de volume trop rapide en prépa marathon ; 2026-07-24 : reprise trop rapide après une grosse course).
 - La carte compacte "Santé, zones à surveiller" de Vue jour reste inchangée mais pointe désormais vers cette nouvelle section (lien "voir détail").
 - Toujours aucune base de données, aucun backend — fichier statique régénéré à la main, comme le reste du dashboard.
+
+## Addendum 2026-07-24 (2) — Tuiles de séance façon maquette Planning
+
+Contexte : la maquette "Planning" du même projet claude.ai/design affichait chaque séance en carte avec 4 tuiles stat (Durée / Distance / Charge / Intensité) et une frise SVG du profil d'effort, alors que Vue jour affichait les séances en simple barre d'intensité compacte (largeur = durée, hauteur = zone, comme sur intervals.icu).
+
+Changement dans l'onglet **Vue jour**, section Séances :
+- Chaque jour (et chaque option, pour les jours à choix) devient une carte avec 4 tuiles stat + une frise SVG du profil (mêmes couleurs de zone que le reste du dashboard, pas le bleu générique de la maquette).
+- **Durée** reste la seule donnée réelle du plan. **Distance, charge et intensité sont estimées** à partir des zones de la séance (allure moyenne par zone pour la course, vitesse moyenne pour le vélo, allure/100m pour la natation ; charge = repère relatif ~0-100/h par zone, réutilisé aussi pour l'intensité en %) — explicitement marquées "(estimé)" dans l'UI, pas présentées comme une mesure.
+- Ce ne sont pas de nouvelles données inventées sans repère : les allures/vitesses utilisées sont cohérentes avec les zones déjà calibrées dans l'onglet Zones (course, vélo FTP ~260W, natation CSS ~1:38/100m).
+- Toujours aucune base de données, aucun backend — même contrainte que le reste du dashboard.

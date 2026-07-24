@@ -140,20 +140,27 @@
   .day-row .day { color: var(--accent-2); font-weight: 600; min-width: 90px; }
   .day-row .desc { color: var(--text); flex: 1; text-align: right; }
 
-  /* Workout step charts, one per activity (intervals.icu style: width = duration, height = intensity) */
-  .day-block { padding: 14px 0; border-bottom: 1px solid var(--border); }
-  .day-block:last-child { border-bottom: none; }
-  .day-block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-  .day-block-head .day { color: var(--accent-2); font-weight: 600; font-size: 13px; min-width: 90px; }
-  .day-block-head .desc { color: var(--text); font-size: 12.5px; text-align: right; }
-  .day-block.rest .desc { color: var(--muted); font-style: italic; }
-  .workout-bar { display: flex; align-items: flex-end; height: 48px; border-radius: 6px; overflow: hidden; gap: 1px; background: rgba(255,255,255,0.02); }
-  .wseg { position: relative; display: flex; align-items: center; justify-content: center; min-width: 2px; }
-  .wseg.z1 { background: rgba(60,200,180,0.35); }
-  .wseg.z2 { background: rgba(60,200,180,0.55); }
-  .wseg.z3 { background: var(--warn); }
-  .wseg.z4 { background: var(--accent); }
-  .wseg .wlabel { font-size: 9.5px; font-weight: 700; color: #0a0e15; white-space: nowrap; }
+  /* Session cards: stat tiles + SVG effort profile (width = durée, hauteur = zone) */
+  .day-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .day-card:last-child { margin-bottom: 0; }
+  .day-card.rest { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; }
+  .day-card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .day-card-head .day { color: var(--accent-2); font-weight: 600; font-size: 13px; min-width: 90px; }
+  .day-card-head .desc { color: var(--text); font-size: 12.5px; text-align: right; }
+  .day-card.rest .desc { color: var(--muted); font-style: italic; }
+  .option-block { margin-top: 12px; }
+  .option-block:first-child { margin-top: 0; }
+  .option-label { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+  .stat-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+  .stat-tile { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 7px 8px; text-align: center; }
+  .stat-tile .v { font-size: 13px; font-weight: 700; color: var(--accent-2); }
+  .stat-tile .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+  .profile-svg { width: 100%; height: 56px; display: block; }
+  .pseg.z1 { fill: rgba(60,200,180,0.35); }
+  .pseg.z2 { fill: rgba(60,200,180,0.55); }
+  .pseg.z3 { fill: var(--warn); }
+  .pseg.z4 { fill: var(--accent); }
+  .profile-baseline { stroke: var(--border); stroke-width: 1; }
   .zone-legend { display: flex; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); flex-wrap: wrap; }
   .zone-legend .lg { display: flex; align-items: center; gap: 6px; }
   .zone-legend .sw { width: 10px; height: 10px; border-radius: 3px; }
@@ -320,7 +327,7 @@
             <h3 id="sessions-title" style="margin:0">Séances</h3>
             <select id="week-select"></select>
           </div>
-          <div class="note">Largeur des barres = durée, hauteur = intensité (plus haut et plus orangé = plus dur), comme sur intervals.icu.</div>
+          <div class="note">Durée = donnée réelle du plan. Distance, charge et intensité sont estimées à partir des zones de la séance (allure/vitesse/charge moyennes par zone) — pas une mesure directe tant que la séance n'est pas faite.</div>
 
           <div id="sessions-days"></div>
 
@@ -596,15 +603,47 @@
 
   const ZONE_HEIGHT = { z1: 30, z2: 45, z3: 68, z4: 90 };
 
-  function renderWorkout(id, steps) {
-    const el = document.getElementById(id);
-    if (!el) return;
+  // Estimation séance planifiée : pas de mesure réelle tant que la séance n'est pas faite.
+  // Allure/vitesse moyennes par zone (mêmes zones que l'onglet Zones), charge = repère
+  // relatif (z4 ~= seuil, échelle ~0-100/h) réutilisé pour l'intensité en %.
+  const RUN_PACE_MIN_KM = { z1: 5 + 10/60, z2: 4 + 20/60, z3: 3 + 45/60, z4: 3 + 32/60 };
+  const BIKE_SPEED_KMH = { z1: 24, z2: 29, z3: 33, z4: 37 };
+  const SWIM_PACE_MIN_100M = { z1: 1 + 55/60, z2: 1 + 48/60, z3: 1 + 38/60, z4: 1 + 34/60 };
+  const ZONE_LOAD_PER_HOUR = { z1: 35, z2: 50, z3: 70, z4: 95 };
+
+  function estimateSessionStats(sport, steps) {
+    const durationMin = steps.reduce((s, x) => s + x.min, 0);
+    let distanceKm = 0, charge = 0;
+    steps.forEach(s => {
+      const hours = s.min / 60;
+      charge += hours * (ZONE_LOAD_PER_HOUR[s.zone] || 50);
+      if (sport === "run") distanceKm += s.min / RUN_PACE_MIN_KM[s.zone];
+      else if (sport === "bike") distanceKm += hours * BIKE_SPEED_KMH[s.zone];
+      else if (sport === "swim") distanceKm += (s.min / SWIM_PACE_MIN_100M[s.zone]) / 10;
+    });
+    return {
+      durationMin,
+      durationLabel: durationMin >= 60
+        ? `${Math.floor(durationMin/60)}h${durationMin % 60 ? String(durationMin % 60).padStart(2, "0") : ""}`
+        : `${durationMin} min`,
+      distanceKm: Math.round(distanceKm * 10) / 10,
+      charge: Math.round(charge),
+      intensity: Math.min(100, Math.round(charge / (durationMin / 60)))
+    };
+  }
+
+  function renderProfileSVG(steps) {
     const total = steps.reduce((s, x) => s + x.min, 0);
-    el.innerHTML = steps.map(s => {
-      const pct = (s.min / total) * 100;
-      const showLabel = pct > 7;
-      return `<div class="wseg ${s.zone}" style="width:${pct}%;height:${ZONE_HEIGHT[s.zone]}%">${showLabel ? `<span class="wlabel">${s.label || s.min + "'"}</span>` : ""}</div>`;
+    const W = 400, H = 56, BASE = H - 4, MAXSEG = BASE - 6;
+    let x = 0;
+    const rects = steps.map(s => {
+      const w = (s.min / total) * W;
+      const segH = (ZONE_HEIGHT[s.zone] / 100) * MAXSEG;
+      const rect = `<rect class="pseg ${s.zone}" x="${x.toFixed(1)}" y="${(BASE - segH).toFixed(1)}" width="${Math.max(w - 1, 0).toFixed(1)}" height="${segH.toFixed(1)}" rx="2"/>`;
+      x += w;
+      return rect;
     }).join("");
+    return `<svg class="profile-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}<line class="profile-baseline" x1="0" y1="${BASE}" x2="${W}" y2="${BASE}"/></svg>`;
   }
 
   const TUE_SEUIL = [
@@ -636,14 +675,14 @@
       label: "Semaine du 27/07 (à venir)",
       note: "Prochaine semaine déjà construite par plan-my-week.",
       days: [
-        { day: "Lundi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", steps: [{ min: 60, zone: "z2" }] }] },
-        { day: "Mardi", desc: "Seuil brisé 4x6' R3', 58 min", options: [{ label: "", steps: TUE_SEUIL }] },
-        { day: "Mercredi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", steps: [{ min: 60, zone: "z2" }] }] },
-        { day: "Jeudi", desc: "Footing facile, 45 min Z2", options: [{ label: "", steps: [{ min: 45, zone: "z2" }] }] },
+        { day: "Lundi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", sport: "swim", steps: [{ min: 60, zone: "z2" }] }] },
+        { day: "Mardi", desc: "Seuil brisé 4x6' R3', 58 min", options: [{ label: "", sport: "run", steps: TUE_SEUIL }] },
+        { day: "Mercredi", desc: "Natation eau libre, 1h Z2", options: [{ label: "", sport: "swim", steps: [{ min: 60, zone: "z2" }] }] },
+        { day: "Jeudi", desc: "Footing facile, 45 min Z2", options: [{ label: "", sport: "run", steps: [{ min: 45, zone: "z2" }] }] },
         { day: "Ven-Sam", desc: "Trajet vers Annecy, rien de prévu", rest: true },
         { day: "Dimanche", desc: "Reprise libre à Annecy, au choix", options: [
-          { label: "Option: Vélo 2h", steps: [{ min: 120, zone: "z2", label: "Option: Vélo 2h" }] },
-          { label: "Option: CAP 1h30", steps: [{ min: 90, zone: "z2", label: "Option: CAP 1h30" }] }
+          { label: "Option: Vélo 2h", sport: "bike", steps: [{ min: 120, zone: "z2", label: "Option: Vélo 2h" }] },
+          { label: "Option: CAP 1h30", sport: "run", steps: [{ min: 90, zone: "z2", label: "Option: CAP 1h30" }] }
         ]}
       ],
       rollup: {
@@ -665,18 +704,18 @@
       note: "Volume cible ~7h, -12% volontaire avant Embrunman (approche affûtage).",
       days: [
         { day: "Lundi", desc: "Natation ou vélo facile, au choix, 1h Z1-Z2", options: [
-          { label: "Option: Natation 1h", steps: [{ min: 60, zone: "z2", label: "Natation 1h" }] },
-          { label: "Option: Vélo 1h", steps: [{ min: 60, zone: "z2", label: "Vélo 1h" }] }
+          { label: "Option: Natation 1h", sport: "swim", steps: [{ min: 60, zone: "z2", label: "Natation 1h" }] },
+          { label: "Option: Vélo 1h", sport: "bike", steps: [{ min: 60, zone: "z2", label: "Vélo 1h" }] }
         ]},
-        { day: "Mardi", desc: "Vélo qualité, allure 70.3, ~70 min", options: [{ label: "", steps: VELO_70_3 }] },
+        { day: "Mardi", desc: "Vélo qualité, allure 70.3, ~70 min", options: [{ label: "", sport: "bike", steps: VELO_70_3 }] },
         { day: "Mercredi", desc: "Facile, natation ou footing, au choix", options: [
-          { label: "Option: Natation 45'", steps: [{ min: 45, zone: "z2", label: "Natation 45'" }] },
-          { label: "Option: Footing 45'", steps: [{ min: 45, zone: "z2", label: "Footing 45'" }] }
+          { label: "Option: Natation 45'", sport: "swim", steps: [{ min: 45, zone: "z2", label: "Natation 45'" }] },
+          { label: "Option: Footing 45'", sport: "run", steps: [{ min: 45, zone: "z2", label: "Footing 45'" }] }
         ]},
-        { day: "Jeudi", desc: "Course qualité, seuil court, ~38 min", options: [{ label: "", steps: THU_SEUIL_COURT }] },
-        { day: "Vendredi", desc: "Natation facile, 45 min Z1-Z2", options: [{ label: "", steps: [{ min: 45, zone: "z2" }] }] },
+        { day: "Jeudi", desc: "Course qualité, seuil court, ~38 min", options: [{ label: "", sport: "run", steps: THU_SEUIL_COURT }] },
+        { day: "Vendredi", desc: "Natation facile, 45 min Z1-Z2", options: [{ label: "", sport: "swim", steps: [{ min: 45, zone: "z2" }] }] },
         { day: "Samedi", desc: "Trajet Annecy → Embrun, rien de prévu", rest: true },
-        { day: "Dimanche", desc: "Sortie longue légère protégée, 70 min Z1-Z2", options: [{ label: "", steps: [{ min: 70, zone: "z2" }] }] }
+        { day: "Dimanche", desc: "Sortie longue légère protégée, 70 min Z1-Z2", options: [{ label: "", sport: "run", steps: [{ min: 70, zone: "z2" }] }] }
       ],
       rollup: {
         rows: [
@@ -699,17 +738,26 @@
     const w = WEEKS[key];
     document.getElementById("sessions-title").textContent = "Séances, " + w.label;
     const daysEl = document.getElementById("sessions-days");
-    daysEl.innerHTML = w.days.map((d, i) => {
+    daysEl.innerHTML = w.days.map(d => {
       if (d.rest) {
-        return `<div class="day-block rest"><div class="day-block-head"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div></div>`;
+        return `<div class="day-card rest"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div>`;
       }
-      const bars = d.options.map((opt, j) => `<div class="workout-bar" id="w-${key}-${i}-${j}" style="${j > 0 ? 'margin-top:6px' : ''}"></div>`).join("");
-      return `<div class="day-block"><div class="day-block-head"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div>${bars}</div>`;
+      const optionsHtml = d.options.map(opt => {
+        const stats = estimateSessionStats(opt.sport, opt.steps);
+        const labelHtml = opt.label ? `<div class="option-label">${opt.label}</div>` : "";
+        return `<div class="option-block">
+          ${labelHtml}
+          <div class="stat-tiles">
+            <div class="stat-tile"><div class="v">${stats.durationLabel}</div><div class="k">Durée</div></div>
+            <div class="stat-tile"><div class="v">${stats.distanceKm} km</div><div class="k">Distance (estimé)</div></div>
+            <div class="stat-tile"><div class="v">${stats.charge}</div><div class="k">Charge (estimé)</div></div>
+            <div class="stat-tile"><div class="v">${stats.intensity}%</div><div class="k">Intensité (estimé)</div></div>
+          </div>
+          ${renderProfileSVG(opt.steps)}
+        </div>`;
+      }).join("");
+      return `<div class="day-card"><div class="day-card-head"><span class="day">${d.day}</span><span class="desc">${d.desc}</span></div>${optionsHtml}</div>`;
     }).join("");
-    w.days.forEach((d, i) => {
-      if (d.rest) return;
-      d.options.forEach((opt, j) => renderWorkout(`w-${key}-${i}-${j}`, opt.steps));
-    });
     const rt = document.getElementById("rollup-table");
     const rowsHtml = w.rollup.rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
     const totalsHtml = w.rollup.totals.map(r => `<tr class="total"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
