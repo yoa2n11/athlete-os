@@ -1,0 +1,14 @@
+# Secrets / local environment
+.env
+
+# Private data and local workspace artifacts
+DATA STRAVA/
+health/
+.claude/
+.obsidian/
+.impeccable/
+oauth_callback.log
+*.fit.gz
+*.csv
+*.log
+

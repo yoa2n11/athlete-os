@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Athlete OS — Dashboard</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #131922;
+    --panel-2: #161d28;
+    --border: #232b38;
+    --text: #e8edf4;
+    --muted: #8a96a8;
+    --accent: #ff5a3c;
+    --accent-2: #3cc8b4;
+    --good: #3ddc84;
+    --warn: #ffb84d;
+    --bad: #ff5a5a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 8px;
+  }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+  header .date { color: var(--muted); font-size: 14px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .card h2 {
+    margin: 0 0 14px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* Hero: countdown */
+  .hero { grid-column: span 5; background: linear-gradient(135deg, #1a1420, #0b0f14); border-color: #2a1c22; }
+  .hero .days { font-size: 80px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .hero .label { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .hero .race { font-size: 18px; margin-top: 18px; font-weight: 600; }
+  .hero .goal { color: var(--accent-2); font-size: 14px; margin-top: 4px; }
+
+  /* Readiness */
+  .readiness { grid-column: span 4; }
+  .call {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    font-weight: 700; font-size: 15px; letter-spacing: 0.5px;
+  }
+  .call.hard { background: rgba(61,220,132,0.15); color: var(--good); }
+  .call.easy { background: rgba(255,184,77,0.15); color: var(--warn); }
+  .call.rest { background: rgba(255,90,90,0.15); color: var(--bad); }
+  .readiness .metrics { margin-top: 14px; display: flex; gap: 20px; }
+  .readiness .metric .v { font-size: 20px; font-weight: 700; }
+  .readiness .metric .k { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+  .readiness .reason { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+  /* Skills */
+  .skills { grid-column: span 3; }
+  .tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .tile:last-child { margin-bottom: 0; }
+  .tile .name { font-weight: 600; font-size: 13px; color: var(--accent-2); }
+  .tile .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Volume chart */
+  .volume { grid-column: span 7; }
+  .vert { grid-column: span 5; }
+  .chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin-top: 6px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; }
+  .bar.hours { background: linear-gradient(180deg, var(--accent), #b53a26); }
+  .bar.vertm { background: linear-gradient(180deg, var(--accent-2), #1f7a6c); }
+  .bar-val { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  .bar-lab { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+  /* Sessions */
+  .sessions { grid-column: span 6; }
+  .sessions .note { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .day-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .day-row:last-child { border-bottom: none; }
+  .day-row .day { color: var(--accent-2); font-weight: 600; min-width: 90px; }
+  .day-row .desc { color: var(--text); flex: 1; text-align: right; }
+
+  /* Paces table */
+  .paces { grid-column: span 6; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; padding-bottom: 8px; font-weight: 600; }
+  td { padding: 6px 0; border-top: 1px solid var(--border); }
+  .hr-tag { padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .hr-z1 { background: rgba(60,200,180,0.15); color: var(--accent-2); }
+  .hr-z2 { background: rgba(61,220,132,0.15); color: var(--good); }
+  .hr-z3 { background: rgba(255,184,77,0.15); color: var(--warn); }
+
+  /* Coaching */
+  .coaching { grid-column: span 12; }
+  .coaching .overview { font-size: 14px; color: var(--text); margin-bottom: 18px; line-height: 1.6; }
+  .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .insight { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .insight .tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+  .insight p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .tips { display: flex; flex-direction: column; gap: 8px; }
+  .tip { display: flex; gap: 10px; font-size: 13px; align-items: baseline; padding-left: 12px; border-left: 2px solid var(--accent-2); }
+  .tip .bullet { color: var(--accent-2); font-weight: 700; }
+
+  @media (max-width: 900px) {
+    .hero, .readiness, .skills, .volume, .vert, .sessions, .paces, .insights { grid-column: span 12; }
+    .insights { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏃 Athlete OS</h1>
+    <div class="date">Vendredi 24 juillet 2026</div>
+  </header>
+
+  <div class="grid">
+
+    <div class="card hero">
+      <h2>Objectif de l'année</h2>
+      <div class="days">86</div>
+      <div class="label">jours avant le départ</div>
+      <div class="race">Marathon d'Amsterdam — 18 octobre 2026</div>
+      <div class="goal">Objectif : sub-2h40 (3:47/km)</div>
+    </div>
+
+    <div class="card readiness">
+      <h2>Appel du jour</h2>
+      <span class="call hard">GO HARD</span>
+      <div class="metrics">
+        <div class="metric"><div class="v">0.47</div><div class="k">ACWR</div></div>
+        <div class="metric"><div class="v">61.2</div><div class="k">CTL</div></div>
+        <div class="metric"><div class="v">53.5</div><div class="k">ATL</div></div>
+      </div>
+      <div class="reason">Tu es frais (ATL &lt; CTL). L'ACWR bas reflète la semaine de coupure volontaire avant Embrunman, pas un signal d'alerte. Aucune gêne Achille/TFL/ischio signalée récemment.</div>
+    </div>
+
+    <div class="card skills">
+      <h2>Compétences</h2>
+      <div class="tile"><div class="name">plan-my-week</div><div class="desc">Construit la semaine à venir</div></div>
+      <div class="tile"><div class="name">weekly-review</div><div class="desc">Analyse la semaine passée</div></div>
+      <div class="tile"><div class="name">fuel-and-pace</div><div class="desc">Plan fueling/pacing course</div></div>
+      <div class="tile"><div class="name">recovery-check</div><div class="desc">Appel du jour quotidien</div></div>
+    </div>
+
+    <div class="card volume">
+      <h2>Volume hebdomadaire (heures, 8 dernières semaines)</h2>
+      <div class="chart" id="chart-hours"></div>
+    </div>
+
+    <div class="card vert">
+      <h2>Dénivelé hebdomadaire (m)</h2>
+      <div class="chart" id="chart-vert"></div>
+    </div>
+
+    <div class="card sessions">
+      <h2>Séances — semaine du 27/07 (à venir)</h2>
+      <div class="note">Aucune semaine n'est encore planifiée pour les jours restants de cette semaine (voici la prochaine semaine déjà construite).</div>
+      <div class="day-row"><div class="day">Lundi</div><div class="desc">Natation eau libre</div></div>
+      <div class="day-row"><div class="day">Mardi</div><div class="desc">Course qualité : seuil 4x6' R2'</div></div>
+      <div class="day-row"><div class="day">Mercredi</div><div class="desc">Natation eau libre</div></div>
+      <div class="day-row"><div class="day">Jeudi</div><div class="desc">Footing facile</div></div>
+      <div class="day-row"><div class="day">Ven-Sam</div><div class="desc">Trajet vers Annecy, rien de prévu</div></div>
+      <div class="day-row"><div class="day">Dimanche</div><div class="desc">Reprise libre à Annecy</div></div>
+    </div>
+
+    <div class="card paces">
+      <h2>Allures / FC récentes</h2>
+      <table>
+        <tr><th>Date</th><th>Distance</th><th>Allure</th><th>FC</th></tr>
+        <tr><td>23/07</td><td>8,4 km</td><td>5:40/km</td><td><span class="hr-tag hr-z1">118</span></td></tr>
+        <tr><td>20/07</td><td>10,0 km</td><td>5:15/km</td><td><span class="hr-tag hr-z1">123</span></td></tr>
+        <tr><td>19/07</td><td>21,9 km</td><td>4:11/km</td><td><span class="hr-tag hr-z3">150</span></td></tr>
+        <tr><td>18/07</td><td>9,3 km</td><td>5:29/km</td><td><span class="hr-tag hr-z1">121</span></td></tr>
+        <tr><td>16/07</td><td>9,7 km</td><td>5:17/km</td><td><span class="hr-tag hr-z1">125</span></td></tr>
+        <tr><td>13/07</td><td>14,5 km</td><td>5:25/km</td><td><span class="hr-tag hr-z2">128</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card coaching">
+      <h2>Regard du coach</h2>
+      <div class="overview">Tu es dans une semaine de coupure volontaire avant le Quart Embrunman (15 août), et c'est exactement ce qu'il fallait après le pic de charge de fin juin/juillet. Base aérobie solide, allure seuil bien calibrée sur tes vraies performances. Le vrai chantier reste le travail seuil structuré, qui démarre avec le bloc marathon dès le 17 août.</div>
+      <div class="insights">
+        <div class="insight"><div class="tag">Polarisation 80/20, Seiler</div><p>Quasi toutes tes sorties récentes sont en Z1-Z2, bonne base polarisée, mais ça confirme le manque de travail qualité identifié dans ta philosophie.</p></div>
+        <div class="insight"><div class="tag">ACWR, Gabbett</div><p>0,47 cette semaine : loin en dessous de la zone 0,8-1,3, reflet direct de la coupure volontaire, sans risque tant que ce n'est pas prolongé plusieurs semaines.</p></div>
+        <div class="insight"><div class="tag">Base Lydiard</div><p>La fondation aérobie est posée ; le bloc marathon (17/08) sera le moment de basculer vers le travail spécifique, pas avant.</p></div>
+        <div class="insight"><div class="tag">Seuil brisé, Bakken</div><p>Une seule sortie sur les 4 dernières semaines a touché la zone tempo/seuil (19/07), la première séance seuil structurée arrive en semaine 3 du bloc.</p></div>
+      </div>
+      <div class="tips">
+        <div class="tip"><span class="bullet">→</span> Garde cette semaine légère, la priorité est d'arriver frais au Quart Embrunman du 15 août.</div>
+        <div class="tip"><span class="bullet">→</span> Continue à surveiller Achille / TFL / ischio-jambier, surtout à la reprise du 17 août.</div>
+        <div class="tip"><span class="bullet">→</span> Prépare le fueling/pacing du Quart Embrunman (course courte, tu peux pousser un vrai effort sans risque pour Amsterdam).</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const hours = [1.5, 6.9, 7.1, 9.2, 8.0, 7.2, 9.2, 1.7];
+  const hoursLabels = ["S23","S24","S25","S26","S27","S28","S29","S30"];
+  const vert = [1039, 801, 713, 1327, 1006, 1245, 1248, 138];
+
+  function renderChart(id, values, labels, cls, unit) {
+    const el = document.getElementById(id);
+    const max = Math.max(...values);
+    el.innerHTML = values.map((v, i) => {
+      const h = Math.max(4, Math.round((v / max) * 110));
+      return `<div class="bar-col">
+        <div class="bar-val">${v}${unit}</div>
+        <div class="bar ${cls}" style="height:${h}px"></div>
+        <div class="bar-lab">${labels[i]}</div>
+      </div>`;
+    }).join("");
+  }
+
+  renderChart("chart-hours", hours, hoursLabels, "hours", "h");
+  renderChart("chart-vert", vert, hoursLabels, "vertm", "");
+</script>
+</body>
+</html>
